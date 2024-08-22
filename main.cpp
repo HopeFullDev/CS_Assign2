@@ -3,6 +3,7 @@
 // #include <vector>
 #include "bits/stdc++.h"
 #include "config.h"
+#include <optional>
 
 // USING ull for all numbers
 #define ull unsigned long long
@@ -48,6 +49,7 @@ public:
     noOfPages = VIRTUAL_MEM_SIZE / pageTableSize;
   }
 };
+
 // class to implement the memory manager it will allot the free frames and keep
 // the record of that
 class MemoryManager {
@@ -76,8 +78,40 @@ public:
   // how amany frames alloted , frame no of first frame alloted  and size
   // requested
   std::vector<MM_table> allotedMemoryTable;
-  ull assignMemory(ull size, unsigned long long task_id);
+  std::optional<ull> assignMemory(ull size, unsigned long long task_id);
 };
+
+// The implementation of the memory alloting function for alloting memory to a
+// task and updating the record in the vector table and the other member
+// variables
+std::optional<ull> MemoryManager::assignMemory(unsigned long long size,
+                                               unsigned long long task_id) {
+  // check if the size requested is larger than available memory
+  if (freeMemory > size) {
+
+    //    we store this variable because we are updating this variable
+
+    ull returnFrameNo = this->nextFreeFrameNo;
+
+    //    adding the mm table entry in the vector
+    allotedMemoryTable.push_back({task_id, size, this->nextFreeFrameNo,
+                                  static_cast<ull>(ceil(size / PAGE_SIZE))});
+    ull noOfFramesAlloted = static_cast<ull>(ceil(size / PAGE_SIZE));
+    // updating the free Memory available
+    this->freeMemory -= (noOfFramesAlloted * PAGE_SIZE);
+    // now updating the nextFreeFrameNo
+    MM_table &lastElement = allotedMemoryTable.back();
+
+    this->nextFreeFrameNo =
+        lastElement.firstAllotedFrameNo +
+        lastElement.noOfFramesAlloted /*ceil(size/PAGE_SIZE)+1*/;
+    return returnFrameNo;
+  }
+  // in case if condidtion is alse then reaturn an error in the form of sending
+  // max element of unsigned long long we have to handle this case while calling
+  // this function
+  return std::nullopt;
+}
 
 // a universal instance of memory manager for keeping it seperate from the tasks
 static MemoryManager mmInstance;
