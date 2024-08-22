@@ -4,7 +4,7 @@
 #include "bits/stdc++.h"
 #include "config.h"
 
-// USING unsigned long long for all numbers
+// USING ull for all numbers
 #define ull unsigned long long
 
 // Table for keeping track of how much memory was given to which task
@@ -26,31 +26,36 @@ public:
 class Task {
 public:
   //  each task will have some id attached to it that is stored in this variable
-  unsigned long long task_id;
+  ull task_id;
   //  the size of page table
-  ull pageTableSize = PAGE_SIZE;
+  ull pageTableSize;
   // no of pages in the page table these page no will be mapped to frame no in
   // physical memory
-  ull noOfPages = VIRTUAL_MEM_SIZE / pageTableSize;
+  ull noOfPages;
+
   // this is the first implementation of page table as key value in a hash map
-  std::unordered_map<unsigned long long, unsigned long long>
-      PageTableImplementationA;
+  std::unordered_map<ull, unsigned long long> PageTableImplementationA;
+  // the second implementation of page table as single level page table
+
   // this function will request the memory which is frame no from the memory
   // manager , and in return it will get the first alloted frame no in case of
   // requested size is larger than frame size we will have to handle that in
   // this as well , also is will also check of the requested virtual address
   // already exists in the page table
-  void requestMemory(unsigned long long size,
-                     unsigned long long virtual_address);
+  void requestMemory(ull size, ull virtual_address);
+  Task() {
+    pageTableSize = PAGE_SIZE;
+    noOfPages = VIRTUAL_MEM_SIZE / pageTableSize;
+  }
 };
 // class to implement the memory manager it will allot the free frames and keep
 // the record of that
 class MemoryManager {
 public:
   // variable to note the free memory available
-  unsigned long long freeMemory;
+  ull freeMemory;
   // variable to note the total no of frames in the physical memory
-  unsigned long long frameSize;
+  ull frameSize;
   // variable to hold the next free frame no
   ull nextFreeFrameNo;
   // variable to track the free frames
@@ -71,7 +76,7 @@ public:
   // how amany frames alloted , frame no of first frame alloted  and size
   // requested
   std::vector<MM_table> allotedMemoryTable;
-  ull assignMemory(unsigned long long size, unsigned long long task_id);
+  ull assignMemory(ull size, unsigned long long task_id);
 };
 
 // a universal instance of memory manager for keeping it seperate from the tasks
