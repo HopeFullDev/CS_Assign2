@@ -38,19 +38,41 @@ public:
   // this function will request the memory which is frame no from the memory
   // manager , and in return it will get the first alloted frame no in case of
   // requested size is larger than frame size we will have to handle that in
-  // this as well
+  // this as well , also is will also check of the requested virtual address
+  // already exists in the page table
   void requestMemory(unsigned long long size,
                      unsigned long long virtual_address);
 };
-
+// class to implement the memory manager it will allot the free frames and keep
+// the record of that
 class MemoryManager {
 public:
-  unsigned long long freeMemory = PHYSICAL_MEM_SIZE;
-  unsigned long long frameSize = PAGE_SIZE;
-  ull nextFreeFrame = 0x000000000;
-  ull noOfFreeFrames = PHYSICAL_MEM_SIZE / PAGE_SIZE;
+  // variable to note the free memory available
+  unsigned long long freeMemory;
+  // variable to note the total no of frames in the physical memory
+  unsigned long long frameSize;
+  // variable to hold the next free frame no
+  ull nextFreeFrameNo;
+  // variable to track the free frames
+  ull noOfFreeFrames;
+
+  MemoryManager() {
+
+    freeMemory = PHYSICAL_MEM_SIZE;
+
+    frameSize = PAGE_SIZE;
+    // intialising the free frame no
+    nextFreeFrameNo = 0x000000000;
+    //    finding the free variable
+    noOfFreeFrames = PHYSICAL_MEM_SIZE / PAGE_SIZE;
+  }
+
+  // vector to hold the details of which memory is alloted to which task id ,
+  // how amany frames alloted , frame no of first frame alloted  and size
+  // requested
   std::vector<MM_table> allotedMemoryTable;
   ull assignMemory(unsigned long long size, unsigned long long task_id);
 };
 
+// a universal instance of memory manager for keeping it seperate from the tasks
 static MemoryManager mmInstance;
