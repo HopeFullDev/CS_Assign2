@@ -2,8 +2,7 @@
 
 ## Pending work
 
-- Implementation of page tables
-- Test Module
-- Request function for memory
-- Driver code /main
-- page hit and miss for all three page table implementations
+- Implementation of page tables : done with two implementation pending two level
+- Test Module : done
+- Driver code /main : partial
+
