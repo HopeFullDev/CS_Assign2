@@ -12,7 +12,7 @@ public:
 };
 void Test_Module ::Genetrate_Traces(ull size,ull task_id ,ull noOfFramesAlloted,ull firstAllotedFrameNo )
 {
-  int min = 1;
+  int min = (long long)firstAllotedFrameNo;
     int max = noOfFramesAlloted;
 
     // Create a random number generator
