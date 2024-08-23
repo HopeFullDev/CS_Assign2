@@ -115,3 +115,15 @@ std::optional<ull> MemoryManager::assignMemory(unsigned long long size,
 
 // a universal instance of memory manager for keeping it seperate from the tasks
 static MemoryManager mmInstance;
+
+
+
+class Test_Module
+{
+public:
+Genetrate_Traces(unsigned long long size,unsigned long long task_id );
+};
+Test_Module :: Generate_Traces(unsigned long long size,unsigned long long task_id)
+{
+  
+}
