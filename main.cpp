@@ -200,21 +200,23 @@ public:
   void Genetrate_Traces(unsigned long long size, unsigned long long task_id,
                         unsigned long long noOfFramesAlloted);
 };
-Test_Module ::Genetrate_Traces(unsigned long long size,
-                               unsigned long long task_id,
-                               unsigned long long noOfFramesAlloted) {
+Test_Module ::Genetrate_Traces(unsigned long long size,unsigned long long task_id ,unsigned long long noOfFramesAlloted )
+{
   int min = 1;
-  int max = noOfFramesAlloted;
+    int max = noOfFramesAlloted;
 
-  // Create a random number generator
-  std::random_device rd;  // Obtain a random seed from the hardware
-  std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+    // Create a random number generator
+    std::random_device rd;  // Obtain a random seed from the hardware
+    std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
 
-  // Define a uniform distribution in the range [min, max]
-  std::uniform_int_distribution<> distr(min, max);
+    // Define a uniform distribution in the range [min, max]
+    std::uniform_int_distribution<> distr(min, max);
 
-  // Generate and print a random number in the given range
-  int random_number = distr(gen);
+    // Generate and print a random number in the given range
+    int random_number_1 = distr(gen);
+    std::uniform_int_distribution<> distr(random_number_1,noOfFramesAlloted );
+ unsigned long long Base = 
+}
 
   if ()
 };
