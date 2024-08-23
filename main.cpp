@@ -121,9 +121,22 @@ static MemoryManager mmInstance;
 class Test_Module
 {
 public:
-Genetrate_Traces(unsigned long long size,unsigned long long task_id );
+Genetrate_Traces(unsigned long long size,unsigned long long task_id, unsigned long long noOfFramesAlloted );
 };
-Test_Module :: Generate_Traces(unsigned long long size,unsigned long long task_id)
+Test_Module ::Genetrate_Traces(unsigned long long size,unsigned long long task_id ,unsigned long long noOfFramesAlloted )
 {
-  
+  int min = 1;
+    int max = noOfFramesAlloted;
+
+    // Create a random number generator
+    std::random_device rd;  // Obtain a random seed from the hardware
+    std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+
+    // Define a uniform distribution in the range [min, max]
+    std::uniform_int_distribution<> distr(min, max);
+
+    // Generate and print a random number in the given range
+    int random_number = distr(gen);
+
+  if()
 }
