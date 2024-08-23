@@ -155,21 +155,43 @@ void Task::requestMemory(ull size, ull virtual_address) {
       std::cout << "Task Id: " << this->task_id << " requested " << size
                 << " in bytes but available memory is only "
                 << mmInstance.freeMemory << " in bytes" << std::endl;
+      return;
     } else {
       // here we know that we have been alloted some frames
       ull initialFrameNo = frameNo.value();
       // now in case the requested memory is larger than single page we have to
       // handle that here
       ull noOfFramesAlloted = (size + PAGE_SIZE - 1) / PAGE_SIZE;
-      if (noOfFramesAlloted == 1) {
-        PageTableImplementationA[pageNoOfVirtualAddress] = initialFrameNo;
-      } else {
-        for (ull i = 0; i < noOfFramesAlloted; i++) {
-          PageTableImplementationA[pageNoOfVirtualAddress + i * PAGE_SIZE] =
-              initialFrameNo + i * PAGE_SIZE;
-        }
+
+      for (ull i = 0; i < noOfFramesAlloted; i++) {
+        PageTableImplementationA[pageNoOfVirtualAddress + i] =
+            initialFrameNo + i;
       }
     }
   }
   return;
 }
+
+class Test_Module {
+public:
+  void Genetrate_Traces(unsigned long long size, unsigned long long task_id,
+                        unsigned long long noOfFramesAlloted);
+};
+Test_Module ::Genetrate_Traces(unsigned long long size,
+                               unsigned long long task_id,
+                               unsigned long long noOfFramesAlloted) {
+  int min = 1;
+  int max = noOfFramesAlloted;
+
+  // Create a random number generator
+  std::random_device rd;  // Obtain a random seed from the hardware
+  std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+
+  // Define a uniform distribution in the range [min, max]
+  std::uniform_int_distribution<> distr(min, max);
+
+  // Generate and print a random number in the given range
+  int random_number = distr(gen);
+
+  if ()
+};
