@@ -1,5 +1,5 @@
-#include <bits/stdc++.h>
 #include "config.h"
+#include <bits/stdc++.h>
 #include <iostream>
 #include <optional>
 #include <ostream>
@@ -60,7 +60,6 @@ std::optional<ull> MemoryManager::assignMemory(unsigned long long size,
                                                unsigned long long task_id) {
   // check if the size requested is larger than available memory
   if (freeMemory > size) {
-
 
     ull returnFrameNo = this->nextFreeFrameNo;
 
@@ -133,17 +132,23 @@ public:
 void Task::requestMemory(ull size, ull virtual_address) {
   // get the page number for the virtual address where
   ull pageNoOfVirtualAddress = virtual_address / pageTableSize;
-  // first lets deal wiht implemenattion A
+
+  // we know that the difference between type A and Type B table is one will be
+  // hashmap and other is a prealloted array first lets deal wiht implemenattion
+  // A
   //  Check if page aldready exists
   if (PageTableImplementationA.find(pageNoOfVirtualAddress) !=
       PageTableImplementationA.end()) {
-    ++pageHitImplementationA;
-    return;
+    this->pageHitImplementationA++;
 
+    this->pageHitImplementationB++;
+    return;
   }
   // for implemantation A the page does not exist. so request the page
   else {
-    ++pageFaultImplementationA;
+    this->pageFaultImplementationA++;
+    this->pageFaultImplementationB++;
+
     auto frameNo = mmInstance.assignMemory(size, this->task_id);
 
     if (!frameNo.has_value()) {
@@ -160,8 +165,10 @@ void Task::requestMemory(ull size, ull virtual_address) {
       ull noOfFramesAlloted = (size + PAGE_SIZE - 1) / PAGE_SIZE;
 
       for (ull i = 0; i < noOfFramesAlloted; i++) {
-        PageTableImplementationA[pageNoOfVirtualAddress + i] =
+        this->PageTableImplementationA[pageNoOfVirtualAddress + i] =
             initialFrameNo + i;
+        this->PageTableImplementationB[pageNoOfVirtualAddress + i] =
+            initialFrameNo + 1;
       }
     }
   }
