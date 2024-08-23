@@ -3,7 +3,10 @@
 // #include <vector>
 #include "bits/stdc++.h"
 #include "config.h"
+#include <iostream>
 #include <optional>
+#include <ostream>
+#include <vector>
 
 // USING ull for all numbers
 #define ull unsigned long long
@@ -20,34 +23,6 @@ public:
       // it is possible that the size requested by the task is greater than the
       // page size then multiple frames will be alloted that record is kept here
       noOfFramesAlloted;
-};
-
-// this class will define the three implementation of page tables and the
-// associated variables to track the allocation of memory
-class Task {
-public:
-  //  each task will have some id attached to it that is stored in this variable
-  ull task_id;
-  //  the size of page table
-  ull pageTableSize;
-  // no of pages in the page table these page no will be mapped to frame no in
-  // physical memory
-  ull noOfPages;
-
-  // this is the first implementation of page table as key value in a hash map
-  std::unordered_map<ull, unsigned long long> PageTableImplementationA;
-  // the second implementation of page table as single level page table
-
-  // this function will request the memory which is frame no from the memory
-  // manager , and in return it will get the first alloted frame no in case of
-  // requested size is larger than frame size we will have to handle that in
-  // this as well , also is will also check of the requested virtual address
-  // already exists in the page table
-  void requestMemory(ull size, ull virtual_address);
-  Task() {
-    pageTableSize = PAGE_SIZE;
-    noOfPages = VIRTUAL_MEM_SIZE / pageTableSize;
-  }
 };
 
 // class to implement the memory manager it will allot the free frames and keep
@@ -89,7 +64,7 @@ std::optional<ull> MemoryManager::assignMemory(unsigned long long size,
   // check if the size requested is larger than available memory
   if (freeMemory > size) {
 
-    //    we store this variable because we are updating this variable
+    // we store this variable because we are updating this variable
 
     ull returnFrameNo = this->nextFreeFrameNo;
 
@@ -115,3 +90,86 @@ std::optional<ull> MemoryManager::assignMemory(unsigned long long size,
 
 // a universal instance of memory manager for keeping it seperate from the tasks
 static MemoryManager mmInstance;
+
+// this class will define the three implementation of page tables and the
+// associated variables to track the allocation of memory
+class Task {
+public:
+  //  each task will have some id attached to it that is stored in this variable
+  ull task_id;
+  //  the size of page table
+  ull pageTableSize;
+  // no of pages in the page table these page no will be mapped to frame no in
+  // physical memory for implemenation type A and B
+  ull noOfPages;
+  //  Variables to keep track of page hits in different implementations
+  ull pageHitImplementationA, pageHitImplementationB, pageHitImplementationC;
+  //  Variables to keep track of page miss/faults in different implementations
+  ull pageFaultImplementationA, pageFaultImplementationB,
+      pageFaultImplementationC;
+
+  // this is the first implementation of page table as key value in a hash map
+  std::unordered_map<ull, ull> PageTableImplementationA;
+
+  // the second implementation of page table as single level page table
+  // we create the page table as a vector size = Page size
+  std::vector<ull> PageTableImplementationB;
+
+  // this function will request the memory which is frame no from the memory
+  // manager , and in return it will get the first alloted frame no in case of
+  // requested size is larger than frame size we will have to handle that in
+  // this as well , also is will also check of the requested virtual address
+  // already exists in the page table
+  void requestMemory(ull size, ull virtual_address);
+
+  Task() {
+    pageTableSize = PAGE_SIZE;
+    noOfPages = VIRTUAL_MEM_SIZE / pageTableSize;
+    PageTableImplementationB.resize((ull)pageTableSize);
+    pageHitImplementationA = 0;
+    pageHitImplementationB = 0;
+    pageHitImplementationC = 0;
+    pageFaultImplementationA = 0;
+    pageFaultImplementationB = 0;
+    pageFaultImplementationC = 0;
+  }
+};
+void Task::requestMemory(ull size, ull virtual_address) {
+  // get the page number for the virtual address where
+  ull pageNoOfVirtualAddress = virtual_address / pageTableSize;
+  // first lets deal wiht implemenattion A
+  //  Check if page aldready exists
+  if (PageTableImplementationA.find(pageNoOfVirtualAddress) !=
+      PageTableImplementationA.end()) {
+    ++pageHitImplementationA;
+    return;
+
+  }
+  // for implemantation A the page does not exist. so request the page
+  else {
+    ++pageFaultImplementationA;
+    auto frameNo = mmInstance.assignMemory(size, this->task_id);
+
+    if (!frameNo.has_value()) {
+      // in case the requested size is larger than available memory
+      std::cout << "Task Id: " << this->task_id << " requested " << size
+                << " in bytes but available memory is only "
+                << mmInstance.freeMemory << " in bytes" << std::endl;
+    } else {
+      // here we know that we have been alloted some frames
+      ull initialFrameNo = frameNo.value();
+      // now in case the requested memory is larger than single page we have to
+      // handle that here
+      ull noOfFramesAlloted = (size + PAGE_SIZE - 1) / PAGE_SIZE;
+      if (noOfFramesAlloted == 1) {
+        PageTableImplementationA[pageNoOfVirtualAddress] = initialFrameNo;
+      } else {
+        for (ull i = 0; i < noOfFramesAlloted; i++) {
+          PageTableImplementationA[pageNoOfVirtualAddress + i * PAGE_SIZE] =
+              initialFrameNo + i * PAGE_SIZE;
+        }
+      }
+    }
+  }
+  return;
+}
