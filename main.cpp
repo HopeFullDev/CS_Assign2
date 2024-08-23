@@ -4,6 +4,8 @@
 #include <optional>
 #include <ostream>
 #include <vector>
+#include <regex>
+#include <string>
 
 // USING ull for all numbers
 #define ull unsigned long long
@@ -173,4 +175,40 @@ void Task::requestMemory(ull size, ull virtual_address) {
     }
   }
   return;
+}
+
+
+
+
+
+//Main Function
+
+int main()
+{
+  vector<Task> holdsAllTasks;
+  std::regex pattern(R"(T(\d+):0x([0-9A-Fa-f]+):(\d+)KB)");
+
+    // Test string
+    std::string test_string = "T6:0x03083400:10KB";
+
+    // Declare a match object to hold the results of the search
+    std::smatch match;
+
+    // Perform the regex search with capturing groups
+    if (std::regex_search(test_string, match, pattern)) {
+        // match[1] is the first capture group (Task ID)
+        std::string task_id = match[1];
+
+        // match[2] is the second capture group (Memory Address in Hex)
+        std::string memory_address = match[2];
+
+        // match[3] is the third capture group (Memory Size in KB)
+        std::string memory_size = match[3];
+    }
+ if (holdsAllTasks.search(task_id)
+  holdsAllTasks.push_back({task_id,memory_address,memory_size}) 
+      
+
+
+      
 }
