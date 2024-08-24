@@ -6,6 +6,8 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <boost/algorithm/string.hpp>  // For boost::trim
 
 // USING ull for all numbers
 #define ull unsigned long long
@@ -179,14 +181,27 @@ void Task::requestMemory(ull size, ull virtual_address) {
 
 // Main Function
 
-int main() {
-  vector<Task> holdsAllTasks;
+int main()
+{
+ vector<Task> holdsAllTasks;
+   std::ifstream file("tracefile_1KB_8GB_16GB.txt");
+  if (!file) {
+        std::cerr << "Unable to open file." << std::endl;
+        return 1;  // Return error code
+    }
+ else
+  {
+    
+   while(std::getline(file, line))
+     {
   std::regex pattern(R"(T(\d+):0x([0-9A-Fa-f]+):(\d+)KB)");
 
   // Test string
-  std::string test_string = "T6:0x03083400:10KB";
-
+  std::string test_string = std::getline(file, line);
+  boost::trim(test_string); 
+       
   // Declare a match object to hold the results of the search
+       
   std::smatch match;
   ull task_id;
   ull memory_address;
@@ -204,4 +219,6 @@ int main() {
   }
  if (holdsAllTasks.search(task_id)
   holdsAllTasks.push_back({task_id,memory_address,memory_size})
+}
+}
 }
