@@ -220,12 +220,14 @@ int main()
     {
  if(holdsAllTasks[i].task_id==task_id )
  holdsAllTasks[i].requestMemory(memory_size,memory_address);
+      break:
 }
  else
     {
-      Task task_id;
-      holdsAllTasks.push_back(task_id);
-      task_id.requestMemory(memory_size,memory_address);
+      Task newtask;
+      newtask.task_id= task_id;
+      holdsAllTasks.push_back(newtask);
+      newtask.requestMemory(memory_size,memory_address);
      }
 }
 
