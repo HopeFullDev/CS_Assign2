@@ -229,5 +229,24 @@ int main()
       holdsAllTasks.push_back(newtask);
       newtask.requestMemory(memory_size,memory_address);
      }
+
+  cout<<"Check the Following Memory Details of Processes nd Memory Manager :"<<endl;
+  cout<<"As per the Assignment we have the following assumptions :"<<endl;
+  cout<<"Virtual Memory size is  : 4GB"<<endl;
+  cout<<"Physical Memory size is : 4GB"<<endl;
+  cout<<"Page Size size is       : 4GB"<<endl;
+  for(ull i=0;i<holdsALLTasks.size();i++)
+    {
+     cout<<"The Task ID - T"<< holdsAllTasks[i].task_id << " has the following details : " <<endl<<;
+     cout<<"Page Table Size is : "<<holdsAllTasks[i].pageTableSize<<endl;
+     cout<<"Number of Page hits in Implementation A (hash_map) are  = :"<<holdsAllTasks[i].pageHitImplementationA<<endl;
+     cout<<"Number of Page hits in Implementation B (Single Level Page Table) are  = :"<<holdsAllTasks[i].pageHitImplementationB<<endl; 
+     cout<<"Number of Page hits in Implementation C (Multi Level Page Table) are  = :"<<holdsAllTasks[i].pageHitImplementationC<<endl; 
+     cout<<"Number of Page Misses in Implementation A (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationA<<endl;
+     cout<<"Number of Page Misses in Implementation B (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationB<<endl;
+      cout<<"Number of Page Misses in Implementation C (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationC<<endl<<endl;
+    }
+
+       
 }
 
