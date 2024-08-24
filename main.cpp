@@ -239,20 +239,20 @@ int main()
   cout<<"Page Size size is       : 4GB"<<endl;
   for(ull i=0;i<holdsALLTasks.size();i++)
     {
-     cout<<"The Task ID - T"<< holdsAllTasks[i].task_id << " has the following details : " <<endl<<;
-     cout<<"Page Table Size is : "<<holdsAllTasks[i].pageTableSize<<endl;
-     cout<<"Number of Page hits in Implementation A (hash_map) are  = :"<<holdsAllTasks[i].pageHitImplementationA<<endl;
-     cout<<"Number of Page hits in Implementation B (Single Level Page Table) are  = :"<<holdsAllTasks[i].pageHitImplementationB<<endl; 
-     cout<<"Number of Page hits in Implementation C (Multi Level Page Table) are  = :"<<holdsAllTasks[i].pageHitImplementationC<<endl; 
-     cout<<"Number of Page Misses in Implementation A (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationA<<endl;
-     cout<<"Number of Page Misses in Implementation B (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationB<<endl;
-      cout<<"Number of Page Misses in Implementation C (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationC<<endl<<endl;
+    std:: cout<<"The Task ID - T"<< holdsAllTasks[i].task_id << " has the following details : " <<endl<<;
+    std:: cout<<"Page Table Size is : "<<holdsAllTasks[i].pageTableSize<<endl;
+    std:: cout<<"Number of Page hits in Implementation A (hash_map) are  = :"<<holdsAllTasks[i].pageHitImplementationA<<endl;
+    std:: cout<<"Number of Page hits in Implementation B (Single Level Page Table) are  = :"<<holdsAllTasks[i].pageHitImplementationB<<endl; 
+    std:: cout<<"Number of Page hits in Implementation C (Multi Level Page Table) are  = :"<<holdsAllTasks[i].pageHitImplementationC<<endl; 
+    std:: cout<<"Number of Page Misses in Implementation A (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationA<<endl;
+    std:: cout<<"Number of Page Misses in Implementation B (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationB<<endl;
+    std::  cout<<"Number of Page Misses in Implementation C (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationC<<endl<<endl;
     }
        MemoryManager display; 
-       cout<<endl<<endl;
-       cout<<"Total Memory Size : 4 GB";
-       cout<<" Free Memory : "<<display.freeMemory<<" Bytes";
-       cout<<" Memory Used : "<<(2^32 - display.freeMemory) <<"  Bytes";
+      std:: cout<<endl<<endl;
+      std:: cout<<"Total Memory Size : 4 GB";
+      std:: cout<<" Free Memory : "<<display.freeMemory<<" Bytes";
+      std:: cout<<" Memory Used : "<<(2^32 - display.freeMemory) <<"  Bytes";
        
 }
 
