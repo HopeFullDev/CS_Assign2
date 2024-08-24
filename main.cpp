@@ -63,20 +63,21 @@ std::optional<ull> MemoryManager::assignMemory(unsigned long long size,
   // check if the size requested is larger than available memory
   if (freeMemory > size) {
 
-    ull returnFrameNo = this->nextFreeFrameNo;
+    ull returnFrameNo = nextFreeFrameNo;
 
     //    adding the mm table entry in the vector
-    allotedMemoryTable.push_back({task_id, size, this->nextFreeFrameNo,
-                                  static_cast<ull>(ceil(size / PAGE_SIZE))});
-    ull noOfFramesAlloted = static_cast<ull>(ceil(size / PAGE_SIZE));
+    allotedMemoryTable.push_back(
+        {task_id, size, nextFreeFrameNo,
+         static_cast<ull>(ceil((float)size / PAGE_SIZE))});
+    ull noOfFramesAlloted = static_cast<ull>(ceil((float)size / PAGE_SIZE));
     // updating the free Memory available
-    this->freeMemory -= (noOfFramesAlloted * PAGE_SIZE);
+    freeMemory -= (noOfFramesAlloted * PAGE_SIZE);
+    noOfFreeFrames -= noOfFramesAlloted;
     // now updating the nextFreeFrameNo
     MM_table &lastElement = allotedMemoryTable.back();
 
-    this->nextFreeFrameNo =
-        lastElement.firstAllotedFrameNo +
-        lastElement.noOfFramesAlloted /*ceil(size/PAGE_SIZE)+1*/;
+    nextFreeFrameNo = lastElement.firstAllotedFrameNo +
+                      lastElement.noOfFramesAlloted /*ceil(size/PAGE_SIZE)+1*/;
     return returnFrameNo;
   }
   // in case if condidtion is alse then reaturn an error in the form of sending
@@ -120,6 +121,7 @@ public:
   void requestMemory(ull size, ull virtual_address);
 
   Task() {
+    task_id = 0;
     pageTableSize = PAGE_SIZE;
     noOfPages = VIRTUAL_MEM_SIZE / pageTableSize;
     PageTableImplementationB.resize((ull)noOfPages);
@@ -141,21 +143,21 @@ void Task::requestMemory(ull size, ull virtual_address) {
   //  Check if page aldready exists
   if (PageTableImplementationA.find(pageNoOfVirtualAddress) !=
       PageTableImplementationA.end()) {
-    this->pageHitImplementationA++;
+    pageHitImplementationA++;
 
-    this->pageHitImplementationB++;
+    pageHitImplementationB++;
     return;
   }
   // for implemantation A the page does not exist. so request the page
   else {
-    this->pageFaultImplementationA++;
-    this->pageFaultImplementationB++;
+    pageFaultImplementationA++;
+    pageFaultImplementationB++;
 
     auto frameNo = mmInstance.assignMemory(size, this->task_id);
 
     if (!frameNo.has_value()) {
       // in case the requested size is larger than available memory
-      std::cout << "Task Id: " << this->task_id << " requested " << size
+      std::cout << "Task Id: " << task_id << " requested " << size
                 << " in bytes but available memory is only "
                 << mmInstance.freeMemory << " in bytes" << std::endl;
       return;
@@ -167,9 +169,9 @@ void Task::requestMemory(ull size, ull virtual_address) {
       ull noOfFramesAlloted = (size + PAGE_SIZE - 1) / PAGE_SIZE;
 
       for (ull i = 0; i < noOfFramesAlloted; i++) {
-        this->PageTableImplementationA[pageNoOfVirtualAddress + i] =
+        PageTableImplementationA[pageNoOfVirtualAddress + i] =
             initialFrameNo + i;
-        this->PageTableImplementationB[pageNoOfVirtualAddress + i] =
+        PageTableImplementationB[pageNoOfVirtualAddress + i] =
             initialFrameNo + 1;
       }
     }
