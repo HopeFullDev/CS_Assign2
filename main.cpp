@@ -187,10 +187,8 @@ int main()
    std::ifstream file("tracefile_1KB_8GB_16GB.txt");
   if (!file) {
         std::cerr << "Unable to open file." << std::endl;
-        return 1;  // Return error code
-    }
- else
-  {
+        return 1;  // Return error code  
+  }
     
    while(std::getline(file, line))
      {
@@ -217,8 +215,17 @@ int main()
     // match[3] is the third capture group (Memory Size in KB)
     memory_size = std::stoull(smatch[3]);
   }
- if (holdsAllTasks.search(task_id)
-  holdsAllTasks.push_back({task_id,memory_address,memory_size})
+       
+  for(ull i=0;i<holdsALLTasks.size();i++)
+    {
+ if(holdsAllTasks[i].task_id==task_id )
+ holdsAllTasks[i].requestMemory(memory_size,memory_address);
 }
+ else
+    {
+      Task task_id;
+      holdsAllTasks.push_back(task_id);
+      task_id.requestMemory(memory_size,memory_address);
+     }
 }
-}
+
