@@ -186,7 +186,10 @@ void Task::requestMemory(ull size, ull virtual_address) {
 int main()
 {
  vector<Task> holdsAllTasks;
-   std::ifstream file("tracefile_1KB_8GB_16GB.txt");
+ std:: string inputFilename;
+ std::cout<<"Enter the file name with the extension .text :"<<endl;
+ std::cin>>inputFilename;
+   std::ifstream file("inputFilename");
   if (!file) {
         std::cerr << "Unable to open file." << std::endl;
         return 1;  // Return error code  
