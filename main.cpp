@@ -194,7 +194,7 @@ int main()
         std::cerr << "Unable to open file." << std::endl;
         return 1;  // Return error code  
   }
-    
+   std:: string line; 
    while(std::getline(file, line))
      {
   std::regex pattern(R"(T(\d+):0x([0-9A-Fa-f]+):(\d+)KB)");
@@ -256,6 +256,6 @@ int main()
       std:: cout<<"Total Memory Size : 4 GB";
       std:: cout<<" Free Memory : "<<display.freeMemory<<" Bytes";
       std:: cout<<" Memory Used : "<<(2^32 - display.freeMemory) <<"  Bytes";
-       
+    
 }
 
