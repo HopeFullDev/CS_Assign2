@@ -246,7 +246,11 @@ int main()
      cout<<"Number of Page Misses in Implementation B (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationB<<endl;
       cout<<"Number of Page Misses in Implementation C (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationC<<endl<<endl;
     }
-
+       MemoryManager display; 
+       cout<<endl<<endl;
+       cout<<"Total Memory Size : 4 GB";
+       cout<<" Free Memory : "<<display.freeMemory<<" Bytes";
+       cout<<" Memory Used : "<<(2^32 - display.freeMemory) <<"  Bytes";
        
 }
 
