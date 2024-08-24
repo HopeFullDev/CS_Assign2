@@ -188,19 +188,19 @@ int main() {
 
   // Declare a match object to hold the results of the search
   std::smatch match;
-  std::string task_id;
-  std::string memory_address;
-  std::string memory_size;
+  ull task_id;
+  ull memory_address;
+  ull memory_size;
   // Perform the regex search with capturing groups
   if (std::regex_search(test_string, match, pattern)) {
     // match[1] is the first capture group (Task ID)
-    task_id = match[1];
+    task_id = std::stoull(match[1]);
 
     // match[2] is the second capture group (Memory Address in Hex)
-    memory_address = match[2];
+    memory_address = std::stoull(match[2]);
 
     // match[3] is the third capture group (Memory Size in KB)
-    memory_size = match[3];
+    memory_size = std::stoull(smatch[3]);
   }
  if (holdsAllTasks.search(task_id)
   holdsAllTasks.push_back({task_id,memory_address,memory_size})
