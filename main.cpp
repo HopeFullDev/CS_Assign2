@@ -212,13 +212,13 @@ int main()
   // Perform the regex search with capturing groups
   if (std::regex_search(test_string, match, pattern)) {
     // match[1] is the first capture group (Task ID)
-    task_id = std::stoull(match[1]);
+    task_id = std::stoull(match[1].str());
 
     // match[2] is the second capture group (Memory Address in Hex)
-    memory_address = std::stoull(match[2]);
+    memory_address = std::stoull(match[2].str());
 
     // match[3] is the third capture group (Memory Size in KB)
-    memory_size = std::stoull(smatch[3]);
+    memory_size = std::stoull(match[3].str());
   }
        
   for(ull i=0;i<holdsALLTasks.size();i++)
