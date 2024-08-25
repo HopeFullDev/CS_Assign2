@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**"
             ],
-            "compilerPath": "C:/MinGW/bin/gcc.exe",
+            "compilerPath": "/usr/lib64/ccache/g++",
             "cStandard": "${default}",
             "cppStandard": "${default}",
             "intelliSenseMode": "windows-gcc-x86",
@@ -16,13 +16,14 @@
         {
             "name": "linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/usr/include/"
             ],
             "defines": [],
-            "compilerPath": "/usr/lib64/ccache/gcc",
+            "compilerPath": "/usr/lib64/ccache/g++",
             "cStandard": "gnu23",
             "cppStandard": "gnu++23",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-clang-x64"
         }
     ],
     "version": 4

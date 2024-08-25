@@ -16,7 +16,7 @@ void Test_Module ::Genetrate_Traces(ull size,ull task_id ,ull noOfFramesAlloted,
     int max = noOfFramesAlloted;
 
     // Create a random number generator
-    std::      rd;  // Obtain a random seed from the hardware
+    std::rd;  // Obtain a random seed from the hardware
     std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
 
     // Define a uniform distribution in the range [min, max]
