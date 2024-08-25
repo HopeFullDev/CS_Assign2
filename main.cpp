@@ -92,6 +92,7 @@ MemoryManager::assignMemoryMultiLevelPage(unsigned long long size,
     allotedMemoryTableMultiLevelPage.push_back(
         {task_id, size, nextFreeFrameNoMultiLevel,
          static_cast<ull>(ceil((float)size / PAGE_SIZE))});
+    //finding the no of frames to be alloted
     ull noOfFramesAlloted = static_cast<ull>(ceil((float)size / PAGE_SIZE));
     // updating the free Memory available
     freeMemoryMultiLevel -= (noOfFramesAlloted * PAGE_SIZE);
@@ -280,9 +281,7 @@ void Task::requestMemory(ull size, ull virtual_address) {
     //  this index will store point to a level 2 page here each entry denotes
     //  4KB physical space
     ull level2_index =
-        (copy_of_virtual_addr >>
-             (PAGE_TABLE_OFFSET_BITS + ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE))) &
-         (1ULL << PAGE_TABLE_OFFSET_BITS) - 1);
+        (copy_of_virtual_addr >>             (PAGE_TABLE_OFFSET_BITS + ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE))) ) &       (  (1ULL << PAGE_TABLE_OFFSET_BITS) - 1) ;
     // this index point to value in level1_index here each entry denotes 4MB
     // physical space
     ull level3_index = ((copy_of_virtual_addr >> PAGE_TABLE_OFFSET_BITS) &
@@ -347,79 +346,103 @@ void Task::requestMemory(ull size, ull virtual_address) {
 
 // Main Function
 
-int main()
-{
- vector<Task> holdsAllTasks;
- std:: string inputFilename;
- std::cout<<"Enter the file name with the extension .text :"<<endl;
- std::cin>>inputFilename;
-   std::ifstream file("inputFilename");
+int main() {
+  std::vector<Task> holdsAllTasks;
+  std::string inputFilename;
+  std::cout << "Enter the file name with the extension .text :" << std::endl;
+  std::cin >> inputFilename;
+  std::ifstream file("inputFilename");
   if (!file) {
-        std::cerr << "Unable to open file." << std::endl;
-        return 1;  // Return error code  
+    std::cerr << "Unable to open file." << std::endl;
+    return 1; // Return error code
   }
-   std:: string line; 
-   while(std::getline(file, line))
-     {
-  std::regex pattern(R"(T(\d+):0x([0-9A-Fa-f]+):(\d+)KB)");
+  std::string line;
+  while (std::getline(file, line)) {
+    std::regex pattern(R"(T(\d+):0x([0-9A-Fa-f]+):(\d+)KB)");
 
-  // Test string
-  std::string test_string = std::getline(file, line);
-  boost::trim(test_string); 
-       
-  // Declare a match object to hold the results of the search
-       
-  std::smatch match;
-  ull task_id;
-  ull memory_address;
-  ull memory_size;
-  // Perform the regex search with capturing groups
-  if (std::regex_search(test_string, match, pattern)) {
-    // match[1] is the first capture group (Task ID)
-    task_id = std::stoull(match[1].str());
+    // Test string
+    std::string test_string;
+    std::getline(file, test_string);
+    boost::trim(test_string);
 
-    // match[2] is the second capture group (Memory Address in Hex)
-    memory_address = std::stoull(match[2].str());
+    // Declare a match object to hold the results of the search
 
-    // match[3] is the third capture group (Memory Size in KB)
-    memory_size = std::stoull(match[3].str());
-  }
-       
-  for(ull i=0;i<holdsALLTasks.size();i++)
-    {
- if(holdsAllTasks[i].task_id==task_id )
- holdsAllTasks[i].requestMemory(memory_size,memory_address);
-      break:
-}
- else
-    {
-      Task newtask;
-      newtask.task_id= task_id;
-      holdsAllTasks.push_back(newtask);
-      newtask.requestMemory(memory_size,memory_address);
-     }
+    std::smatch match;
+    ull task_id;
+    ull memory_address;
+    ull memory_size;
+    // Perform the regex search with capturing groups
+    if (std::regex_search(test_string, match, pattern)) {
+      // match[1] is the first capture group (Task ID)
+      task_id = std::stoull(match[1].str());
 
-  cout<<"Check the Following Memory Details of Processes nd Memory Manager :"<<endl;
-  cout<<"As per the Assignment we have the following assumptions :"<<endl;
-  cout<<"Virtual Memory size is  : 4GB"<<endl;
-  cout<<"Physical Memory size is : 4GB"<<endl;
-  cout<<"Page Size size is       : 4GB"<<endl;
-  for(ull i=0;i<holdsALLTasks.size();i++)
-    {
-    std:: cout<<"The Task ID - T"<< holdsAllTasks[i].task_id << " has the following details : " <<endl<<;
-    std:: cout<<"Page Table Size is : "<<holdsAllTasks[i].pageTableSize<<endl;
-    std:: cout<<"Number of Page hits in Implementation A (hash_map) are  = :"<<holdsAllTasks[i].pageHitImplementationA<<endl;
-    std:: cout<<"Number of Page hits in Implementation B (Single Level Page Table) are  = :"<<holdsAllTasks[i].pageHitImplementationB<<endl; 
-    std:: cout<<"Number of Page hits in Implementation C (Multi Level Page Table) are  = :"<<holdsAllTasks[i].pageHitImplementationC<<endl; 
-    std:: cout<<"Number of Page Misses in Implementation A (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationA<<endl;
-    std:: cout<<"Number of Page Misses in Implementation B (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationB<<endl;
-    std::  cout<<"Number of Page Misses in Implementation C (hash_map) are  = :"<<holdsAllTasks[i].pageFaultImplementationC<<endl<<endl;
+      // match[2] is the second capture group (Memory Address in Hex)
+      memory_address = std::stoull(match[2].str());
+
+      // match[3] is the third capture group (Memory Size in KB)
+      memory_size = std::stoull(match[3].str());
     }
-       MemoryManager display; 
-      std:: cout<<endl<<endl;
-      std:: cout<<"Total Memory Size : 4 GB";
-      std:: cout<<" Free Memory : "<<display.freeMemory<<" Bytes";
-      std:: cout<<" Memory Used : "<<(2^32 - display.freeMemory) <<"  Bytes";
-    
-}
 
+    for (ull i = 0; i < holdsAllTasks.size(); i++) {
+      if (holdsAllTasks[i].task_id == task_id) {
+        holdsAllTasks[i].requestMemory(memory_size, memory_address);
+        break;
+      }
+
+      else {
+        Task newtask;
+        newtask.task_id = task_id;
+        holdsAllTasks.push_back(newtask);
+        newtask.requestMemory(memory_size, memory_address);
+      }
+    }
+  }
+  std::cout
+      << "Check the Following Memory Details of Processes and Memory Manager :"
+      << std::endl;
+  std::cout << "As per the Assignment we have the following assumptions :"
+            << std::endl;
+  std::cout << "Virtual Memory size is  : " << VIRTUAL_MEM_SIZE << std::endl;
+  std::cout << "Physical Memory size is : " << PHYSICAL_MEM_SIZE << std::endl;
+  std::cout << "Page Size size is       : " << PAGE_SIZE << std::endl;
+
+  for (ull i = 0; i < holdsAllTasks.size(); i++) {
+    std::cout << "The Task ID - T" << holdsAllTasks[i].task_id
+              << " has the following details : " << std::endl;
+    std::cout << "Page Table Size is : " << holdsAllTasks[i].pageTableSize
+              << std::endl;
+    std::cout << "Number of Page hits in Implementation A (hash_map) are  = :"
+              << holdsAllTasks[i].pageHitImplementationA << std::endl;
+    std::cout << "Number of Page hits in Implementation B (Single Level Page "
+                 "Table) are  = :"
+              << holdsAllTasks[i].pageHitImplementationB << std::endl;
+    std::cout << "Number of Page hits in Implementation C (Multi Level Page "
+                 "Table) are  = :"
+              << holdsAllTasks[i].pageHitImplementationClvl1 +
+                     holdsAllTasks[i].pageHitImplementationClvl2 +
+                     holdsAllTasks[i].pageHitImplementationClvl3
+              << std::endl;
+
+    std::cout << "Number of Page Misses in Implementation A (hash_map) are  = :"
+              << holdsAllTasks[i].pageFaultImplementationA << std::endl;
+    std::cout << "Number of Page Misses in Implementation B (hash_map) are  = :"
+              << holdsAllTasks[i].pageFaultImplementationB << std::endl;
+    std::cout << "Number of Page Misses in Implementation C (hash_map) are  = :"
+              << holdsAllTasks[i].pageFaultImplementationClvl1 +
+                     holdsAllTasks[i].pageFaultImplementationClvl2 +
+                     holdsAllTasks[i].pageFaultImplementationClvl3
+              << std::endl;
+  }
+
+  std::cout << std::endl;
+  std::cout << "Memory Details for Implementation as Map and Single Level Page Table" <<std::endl;
+  std::cout << " Free Memory : " << mmInstance.freeMemory << " Bytes\n";
+  std::cout << " Memory Used : " << (PHYSICAL_MEM_SIZE - mmInstance.freeMemory)
+            << "  Bytes\n";
+
+        std::cout << std::endl;
+  std::cout << "Memory Details for Three Level Page Table Implementation " <<std::endl;
+  std::cout << " Free Memory : " << mmInstance.freeMemoryMultiLevel << " Bytes\n";
+  std::cout << " Memory Used : " << (PHYSICAL_MEM_SIZE - mmInstance.freeMemoryMultiLevel)
+            << "  Bytes\n";
+}
