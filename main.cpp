@@ -101,9 +101,9 @@ MemoryManager::assignMemoryMultiLevelPage(unsigned long long size,
     //    adding the mm table entry in the vector
     allotedMemoryTableMultiLevelPage.push_back(
         {task_id, size, nextFreeFrameNoMultiLevel,
-         static_cast<ull>(ceil((float)size / PAGE_SIZE))});
+         static_cast<ull>(ceil(size /(float) PAGE_SIZE))});
     // finding the no of frames to be alloted
-    ull noOfFramesAlloted = static_cast<ull>(ceil((float)size / PAGE_SIZE));
+    ull noOfFramesAlloted = static_cast<ull>(ceil(size /(float) PAGE_SIZE));
     // updating the free Memory available
     freeMemoryMultiLevel -= (noOfFramesAlloted * PAGE_SIZE);
     noOfFreeFramesMultiLevel -= noOfFramesAlloted;
@@ -287,77 +287,79 @@ void Task::requestMemory(ull size, ull virtual_address) {
     v_address = v_address + (1ULL << (ull)log2(pageTableSize));
   }
 
-  // // lets check how many lvl3 pages we need for alloting the request Memory
-  // ull required_lvl3_pages = (ull)std::ceil(size / PAGE_SIZE);
+  // lets check how many lvl3 pages we need for alloting the request Memory
+  ull required_lvl3_pages = ceil(size /(float) PAGE_SIZE);
 
-  // ull copy_of_virtual_addr = virtual_address;
+  ull copy_of_virtual_addr = virtual_address;
 
-  // for (uint32_t i = 0; i < required_lvl3_pages; i++) {
-  //   // translaing the virtual address for 3 level paging
-  //   ull level1_index =
-  //       (copy_of_virtual_addr >>
-  //        (PAGE_TABLE_OFFSET_BITS + ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE) +
-  //                                   (ull)log2(PAGE_TABLE_LEVEL_2_SIZE)))) &
-  //       ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1);
-  //   //  this index will store point to a level 2 page here each entry denotes
-  //   //  4KB physical space
-  //   ull level2_index =
-  //       (copy_of_virtual_addr >>             (PAGE_TABLE_OFFSET_BITS +
-  //       ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE))) ) &       (  (1ULL <<
-  //       PAGE_TABLE_OFFSET_BITS) - 1) ;
-  //   // this index point to value in level1_index here each entry denotes 4MB
-  //   // physical space
-  //   ull level3_index = ((copy_of_virtual_addr >> PAGE_TABLE_OFFSET_BITS) &
-  //                       ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1));
+  for (uint32_t i = 0; i < required_lvl3_pages; i++) {
 
-  //   // check if lvl 2 table for the index exists or not
-  //   if (!PageTableImplementationCLevel1[level1_index]) {
-  //     pageFaultImplementationClvl1++;
-  //     PageTableImplementationCLevel1[level1_index] =
-  //         new std::vector<std::vector<ull> *>(PAGE_TABLE_LEVEL_2_SIZE,
-  //         nullptr);
-  //   } else {
-  //     pageHitImplementationClvl1++;
-  //   }
-  //   // check if lvl 3 table for the index exists or not , this lvl 3 holds
-  //   the
-  //   // frame no
-  //   if (!(*PageTableImplementationCLevel1[level1_index])[level2_index]) {
-  //     pageFaultImplementationClvl2++;
-  //     (*PageTableImplementationCLevel1[level1_index])[level2_index] =
-  //         new std::vector<ull>(PAGE_TABLE_LEVEL_3_SIZE, 0);
-  //   } else {
-  //     pageHitImplementationClvl2++;
-  //   }
-  //   // check if there is a frame no present in the lvl3 table at the lvl 3
-  //   index if
-  //   ((*(*PageTableImplementationCLevel1[level1_index])[level2_index])
-  //           [level3_index] != 0) {
-  //     // means there is a frame present at the index
-  //     // also the frame no at this index should be a frame no which will
-  //     // correspond to a 4KB page in physical memory
-  //     pageHitImplementationClvl3++;
-  //   } else {
-  //     pageFaultImplementationClvl3++;
-  //     // request the frame from memory manager
-  //     auto frameNo = mmInstance.assignMemoryMultiLevelPage(PAGE_SIZE,
-  //     task_id); if (frameNo.has_value()) {
-  //       (*(*PageTableImplementationCLevel1[level1_index])[level2_index])
-  //           [level3_index] = frameNo.value();
-  //     } else {
-  //       // in case the requested size is larger than available memory
-  //       std::cout << "Task Id: " << task_id << " requested " << size
-  //                 << " in bytes but available memory is only "
-  //                 << mmInstance.freeMemory << " in bytes FOR MULTI LEVEL
-  //                 PAGING"
-  //                 << std::endl;
-  //       return;
-  //     }
-  //     copy_of_virtual_addr =
-  //         copy_of_virtual_addr + (1ULL <<
-  //         (ull)log2(PAGE_TABLE_LEVEL_3_SIZE));
-  //   }
-  // }
+    // printf("\nPage NO %u \n \n", i);
+
+    // translaing the virtual address for 3 level paging
+    ull level1_index =
+        (copy_of_virtual_addr >>
+         (PAGE_TABLE_OFFSET_BITS + ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE) +
+                                    (ull)log2(PAGE_TABLE_LEVEL_2_SIZE)))) &
+        ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1);
+    //  this index will store point to a level 2 page here each entry denotes
+    //  4KB physical space
+    ull level2_index =
+        (copy_of_virtual_addr >>             (PAGE_TABLE_OFFSET_BITS +
+        ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE))) ) &       (  (1ULL <<
+        PAGE_TABLE_OFFSET_BITS) - 1) ;
+    // this index point to value in level1_index here each entry denotes 4MB
+    // physical space
+    ull level3_index = ((copy_of_virtual_addr >> PAGE_TABLE_OFFSET_BITS) &
+                        ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1));
+
+    // check if lvl 2 table for the index exists or not
+    if (!PageTableImplementationCLevel1[level1_index]) {
+      pageFaultImplementationClvl1++;
+      PageTableImplementationCLevel1[level1_index] =
+          new std::vector<std::vector<ull> *>(PAGE_TABLE_LEVEL_2_SIZE,
+          nullptr);
+    } else {
+      pageHitImplementationClvl1++;
+    }
+    // check if lvl 3 table for the index exists or not , this lvl 3 holds
+    // the
+    // frame no
+    if (!(*PageTableImplementationCLevel1[level1_index])[level2_index]) {
+      pageFaultImplementationClvl2++;
+      (*PageTableImplementationCLevel1[level1_index])[level2_index] =
+          new std::vector<ull>(PAGE_TABLE_LEVEL_3_SIZE, 0);
+    } else {
+      pageHitImplementationClvl2++;
+    }
+    // check if there is a frame no present in the lvl3 table at the lvl 3
+    // index 
+
+    if((*(*PageTableImplementationCLevel1[level1_index])[level2_index])[level3_index] != 0) {
+      // means there is a frame present at the index
+      // also the frame no at this index should be a frame no which will
+      // correspond to a 4KB page in physical memory
+      pageHitImplementationClvl3++;
+    } else {
+      pageFaultImplementationClvl3++;
+      // request the frame from memory manager
+      auto frameNo = mmInstance.assignMemoryMultiLevelPage(PAGE_SIZE,
+      task_id); if (frameNo.has_value()) {
+        (*(*PageTableImplementationCLevel1[level1_index])[level2_index])
+            [level3_index] = frameNo.value();
+      } else {
+        // in case the requested size is larger than available memory
+        std::cout << "Task Id: " << task_id << " requested " << size
+                  << " in bytes but available memory is only "
+                  << mmInstance.freeMemory << " in bytes FOR MULTI LEVEL PAGING"
+                  << std::endl;
+        return;
+      }
+      copy_of_virtual_addr =
+          copy_of_virtual_addr + (1ULL <<
+          (ull)log2(PAGE_TABLE_LEVEL_3_SIZE));
+    }
+  }
 
   /*
      * Test of three level paging idea
@@ -493,8 +495,10 @@ int main() {
 
 ull totalPageHitsImplementationA=0;
 ull totalPageHitsImplementationB=0;
+ull totalPageHitsImplementationC=0;
 ull totalPageFaultsImplementationA=0;
 ull totalPageFaultsImplementationB=0;
+ull totalPageFaultsImplementationC=0;
 
   for (ull i = 0; i < holdsAllTasks.size(); i++) {
     std::cout << "The Task ID - T" << holdsAllTasks[i].task_id
@@ -518,17 +522,19 @@ ull totalPageFaultsImplementationB=0;
 
     std::cout << "Number of Page Misses in Implementation A (hash_map) are  = :"
               << holdsAllTasks[i].pageFaultImplementationA << std::endl;
-    std::cout << "Number of Page Misses in Implementation B (hash_map) are  = :"
+    std::cout << "Number of Page Misses in Implementation B (Single Level Page Table) are  = :"
               << holdsAllTasks[i].pageFaultImplementationB << std::endl;
-    std::cout << "Number of Page Misses in Implementation C (hash_map) are  = :"
+    std::cout << "Number of Page Misses in Implementation C (Multi Level Page Table) are  = :"
               << holdsAllTasks[i].pageFaultImplementationClvl1 +
                      holdsAllTasks[i].pageFaultImplementationClvl2 +
                      holdsAllTasks[i].pageFaultImplementationClvl3
               << std::endl;
 totalPageHitsImplementationA  =totalPageHitsImplementationA + holdsAllTasks[i].pageHitImplementationA;
 totalPageHitsImplementationB  =totalPageHitsImplementationB + holdsAllTasks[i].pageHitImplementationB;
+totalPageHitsImplementationC  =totalPageHitsImplementationC + holdsAllTasks[i].pageHitImplementationClvl3;
 totalPageFaultsImplementationA=totalPageFaultsImplementationA + holdsAllTasks[i].pageFaultImplementationA;
 totalPageFaultsImplementationB=totalPageFaultsImplementationB + holdsAllTasks[i].pageFaultImplementationB;
+totalPageFaultsImplementationC=totalPageFaultsImplementationC+ holdsAllTasks[i].pageFaultImplementationClvl3;
 
   }
 
@@ -543,9 +549,11 @@ totalPageFaultsImplementationB=totalPageFaultsImplementationB + holdsAllTasks[i]
   // printf("Total No of Page Hits Implementation B: %llu \n",totalPageHitsImplementationB);
   std::cout<< "Total No of Page Hits Implementation A:  " << totalPageHitsImplementationA<< std::endl;
   std::cout<< "Total No of Page Hits Implementation B:  " << totalPageHitsImplementationB<< std::endl;
+  std::cout<< "Total No of Page Hits Implementation C:  " << totalPageHitsImplementationC<< std::endl;
 
   std::cout<< "Total No of Page Miss Implementation A: " << totalPageFaultsImplementationA<< std::endl;
   std::cout<< "Total No of Page Miss Implementation B: " << totalPageFaultsImplementationB<< std::endl;
+  std::cout<< "Total No of Page Miss Implementation C: " << totalPageFaultsImplementationC<< std::endl;
 
   std::cout << std::endl;
   std::cout << "Memory Details for Three Level Page Table Implementation "
