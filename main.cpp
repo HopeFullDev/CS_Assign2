@@ -5,21 +5,21 @@
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <optional>
 #include <ostream>
 #include <regex>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iomanip>
-//
 
-unsigned long long stringToAddress(const std::string& hexString) {
-    std::stringstream ss(hexString);
-    unsigned long long address;
-    ss >> std::hex >> address;
-    return address;
+
+unsigned long long stringToAddress(const std::string &hexString) {
+  std::stringstream ss(hexString);
+  unsigned long long address;
+  ss >> std::hex >> address;
+  return address;
 }
 
 // USING ull for all numbers
@@ -102,7 +102,7 @@ MemoryManager::assignMemoryMultiLevelPage(unsigned long long size,
     allotedMemoryTableMultiLevelPage.push_back(
         {task_id, size, nextFreeFrameNoMultiLevel,
          static_cast<ull>(ceil((float)size / PAGE_SIZE))});
-    //finding the no of frames to be alloted
+    // finding the no of frames to be alloted
     ull noOfFramesAlloted = static_cast<ull>(ceil((float)size / PAGE_SIZE));
     // updating the free Memory available
     freeMemoryMultiLevel -= (noOfFramesAlloted * PAGE_SIZE);
@@ -135,15 +135,19 @@ std::optional<ull> MemoryManager::assignMemory(unsigned long long size,
     allotedMemoryTable.push_back(
         {task_id, size, nextFreeFrameNo,
          static_cast<ull>(ceil((float)size / PAGE_SIZE))});
+
     ull noOfFramesAlloted = static_cast<ull>(ceil((float)size / PAGE_SIZE));
+
     // updating the free Memory available
     freeMemory -= (noOfFramesAlloted * PAGE_SIZE);
+
     noOfFreeFrames -= noOfFramesAlloted;
     // now updating the nextFreeFrameNo
     MM_table &lastElement = allotedMemoryTable.back();
 
     nextFreeFrameNo = lastElement.firstAllotedFrameNo +
                       lastElement.noOfFramesAlloted /*ceil(size/PAGE_SIZE)+1*/;
+
     return returnFrameNo;
   }
   // in case if condidtion is alse then reaturn an error in the form of sending
@@ -228,23 +232,28 @@ void Task::requestMemory(ull size, ull virtual_address) {
   //  well
 
   ull v_address = virtual_address;
-  ull noOfFrameRequested = (ull)ceil(size / pageTableSize);
-  for (uint32_t i = 0; i < noOfFrameRequested; i++) {
+
+  ull noOfFrameRequested = ceil(size / (float)pageTableSize);
+
+  for (int i = 0; i < (int)noOfFrameRequested; i++) {
     // get the page number for the virtual address where
     ull pageNoOfVirtualAddress = v_address >> (ull)log2(pageTableSize);
+    // printf("frames requested %llu virtual address %llx \n Virtual address %llb "
+    //        "\n     i = %d",
+    //        noOfFrameRequested, v_address, v_address, i);
+    // // printf("\nPage NO %llx \n Page NO %llb \n", pageNoOfVirtualAddress,
+    //        pageNoOfVirtualAddress);
     // we know that the difference between type A and Type B table is one will
     // be hashmap and other is a prealloted array first lets deal with
     // implemenation A
 
     //  Check if page index value aldready exists
-    if (PageTableImplementationA.find(pageNoOfVirtualAddress) !=
-        PageTableImplementationA.end()) {
+    if (PageTableImplementationA.count(pageNoOfVirtualAddress)) {
       pageHitImplementationA++;
-
+      // printf("\nif page already exists %llx \n", pageNoOfVirtualAddress);
       pageHitImplementationB++;
-      return;
     }
-    // for implemantation A the page does not exist. so request the page
+    // for implemantation A the page does not exispageNoOfVirtualAddresst. so request the page
     else {
       pageFaultImplementationA++;
       pageFaultImplementationB++;
@@ -260,96 +269,105 @@ void Task::requestMemory(ull size, ull virtual_address) {
       } else {
         // here we know that we have been alloted some frames
         ull initialFrameNo = frameNo.value();
+        PageTableImplementationA[pageNoOfVirtualAddress] =
+              initialFrameNo;
         // now in case the requested memory is larger than single page we have
         // to handle that here
-        ull noOfFramesAlloted = (size + PAGE_SIZE - 1) / PAGE_SIZE;
+        // ull noOfFramesAlloted = (size + PAGE_SIZE - 1) / PAGE_SIZE;
 
-        for (ull i = 0; i < noOfFramesAlloted; i++) {
-          PageTableImplementationA[pageNoOfVirtualAddress + i] =
-              initialFrameNo + i;
-          PageTableImplementationB[pageNoOfVirtualAddress + i] =
-              initialFrameNo + 1;
-        }
+        // for (ull i = 0; i < noOfFramesAlloted; i++) {
+        //   PageTableImplementationA[pageNoOfVirtualAddress + i] =
+        //       initialFrameNo + i;
+        //   PageTableImplementationB[pageNoOfVirtualAddress + i] =
+        //       initialFrameNo + 1;
+        // }
       }
     }
 
     v_address = v_address + (1ULL << (ull)log2(pageTableSize));
   }
 
-  // lets check how many lvl3 pages we need for alloting the request Memory
-  ull required_lvl3_pages = (ull)std::ceil(size / PAGE_SIZE);
+  // // lets check how many lvl3 pages we need for alloting the request Memory
+  // ull required_lvl3_pages = (ull)std::ceil(size / PAGE_SIZE);
 
-  ull copy_of_virtual_addr = virtual_address;
+  // ull copy_of_virtual_addr = virtual_address;
 
-  for (uint32_t i = 0; i < required_lvl3_pages; i++) {
-    // translaing the virtual address for 3 level paging
-    ull level1_index =
-        (copy_of_virtual_addr >>
-         (PAGE_TABLE_OFFSET_BITS + ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE) +
-                                    (ull)log2(PAGE_TABLE_LEVEL_2_SIZE)))) &
-        ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1);
-    //  this index will store point to a level 2 page here each entry denotes
-    //  4KB physical space
-    ull level2_index =
-        (copy_of_virtual_addr >>             (PAGE_TABLE_OFFSET_BITS + ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE))) ) &       (  (1ULL << PAGE_TABLE_OFFSET_BITS) - 1) ;
-    // this index point to value in level1_index here each entry denotes 4MB
-    // physical space
-    ull level3_index = ((copy_of_virtual_addr >> PAGE_TABLE_OFFSET_BITS) &
-                        ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1));
+  // for (uint32_t i = 0; i < required_lvl3_pages; i++) {
+  //   // translaing the virtual address for 3 level paging
+  //   ull level1_index =
+  //       (copy_of_virtual_addr >>
+  //        (PAGE_TABLE_OFFSET_BITS + ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE) +
+  //                                   (ull)log2(PAGE_TABLE_LEVEL_2_SIZE)))) &
+  //       ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1);
+  //   //  this index will store point to a level 2 page here each entry denotes
+  //   //  4KB physical space
+  //   ull level2_index =
+  //       (copy_of_virtual_addr >>             (PAGE_TABLE_OFFSET_BITS +
+  //       ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE))) ) &       (  (1ULL <<
+  //       PAGE_TABLE_OFFSET_BITS) - 1) ;
+  //   // this index point to value in level1_index here each entry denotes 4MB
+  //   // physical space
+  //   ull level3_index = ((copy_of_virtual_addr >> PAGE_TABLE_OFFSET_BITS) &
+  //                       ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1));
 
-    // check if lvl 2 table for the index exists or not
-    if (!PageTableImplementationCLevel1[level1_index]) {
-      pageFaultImplementationClvl1++;
-      PageTableImplementationCLevel1[level1_index] =
-          new std::vector<std::vector<ull> *>(PAGE_TABLE_LEVEL_2_SIZE, nullptr);
-    } else {
-      pageHitImplementationClvl1++;
-    }
-    // check if lvl 3 table for the index exists or not , this lvl 3 holds the
-    // frame no
-    if (!(*PageTableImplementationCLevel1[level1_index])[level2_index]) {
-      pageFaultImplementationClvl2++;
-      (*PageTableImplementationCLevel1[level1_index])[level2_index] =
-          new std::vector<ull>(PAGE_TABLE_LEVEL_3_SIZE, 0);
-    } else {
-      pageHitImplementationClvl2++;
-    }
-    // check if there is a frame no present in the lvl3 table at the lvl 3 index
-    if ((*(*PageTableImplementationCLevel1[level1_index])[level2_index])
-            [level3_index] != 0) {
-      // means there is a frame present at the index
-      // also the frame no at this index should be a frame no which will
-      // correspond to a 4KB page in physical memory
-      pageHitImplementationClvl3++;
-    } else {
-      pageFaultImplementationClvl3++;
-      // request the frame from memory manager
-      auto frameNo = mmInstance.assignMemoryMultiLevelPage(PAGE_SIZE, task_id);
-      if (frameNo.has_value()) {
-        (*(*PageTableImplementationCLevel1[level1_index])[level2_index])
-            [level3_index] = frameNo.value();
-      } else {
-        // in case the requested size is larger than available memory
-        std::cout << "Task Id: " << task_id << " requested " << size
-                  << " in bytes but available memory is only "
-                  << mmInstance.freeMemory << " in bytes FOR MULTI LEVEL PAGING"
-                  << std::endl;
-        return;
-      }
-      copy_of_virtual_addr =
-          copy_of_virtual_addr + (1ULL << (ull)log2(PAGE_TABLE_LEVEL_3_SIZE));
-    }
-  }
+  //   // check if lvl 2 table for the index exists or not
+  //   if (!PageTableImplementationCLevel1[level1_index]) {
+  //     pageFaultImplementationClvl1++;
+  //     PageTableImplementationCLevel1[level1_index] =
+  //         new std::vector<std::vector<ull> *>(PAGE_TABLE_LEVEL_2_SIZE,
+  //         nullptr);
+  //   } else {
+  //     pageHitImplementationClvl1++;
+  //   }
+  //   // check if lvl 3 table for the index exists or not , this lvl 3 holds
+  //   the
+  //   // frame no
+  //   if (!(*PageTableImplementationCLevel1[level1_index])[level2_index]) {
+  //     pageFaultImplementationClvl2++;
+  //     (*PageTableImplementationCLevel1[level1_index])[level2_index] =
+  //         new std::vector<ull>(PAGE_TABLE_LEVEL_3_SIZE, 0);
+  //   } else {
+  //     pageHitImplementationClvl2++;
+  //   }
+  //   // check if there is a frame no present in the lvl3 table at the lvl 3
+  //   index if
+  //   ((*(*PageTableImplementationCLevel1[level1_index])[level2_index])
+  //           [level3_index] != 0) {
+  //     // means there is a frame present at the index
+  //     // also the frame no at this index should be a frame no which will
+  //     // correspond to a 4KB page in physical memory
+  //     pageHitImplementationClvl3++;
+  //   } else {
+  //     pageFaultImplementationClvl3++;
+  //     // request the frame from memory manager
+  //     auto frameNo = mmInstance.assignMemoryMultiLevelPage(PAGE_SIZE,
+  //     task_id); if (frameNo.has_value()) {
+  //       (*(*PageTableImplementationCLevel1[level1_index])[level2_index])
+  //           [level3_index] = frameNo.value();
+  //     } else {
+  //       // in case the requested size is larger than available memory
+  //       std::cout << "Task Id: " << task_id << " requested " << size
+  //                 << " in bytes but available memory is only "
+  //                 << mmInstance.freeMemory << " in bytes FOR MULTI LEVEL
+  //                 PAGING"
+  //                 << std::endl;
+  //       return;
+  //     }
+  //     copy_of_virtual_addr =
+  //         copy_of_virtual_addr + (1ULL <<
+  //         (ull)log2(PAGE_TABLE_LEVEL_3_SIZE));
+  //   }
+  // }
 
   /*
-   * Test of three level paging idea
-    std::vector<ull> lvl3(PAGE_TABLE_LEVEL_3_SIZE,0);
-    std::vector<std::vector<ull>* > lvl2(PAGE_TABLE_LEVEL_2_SIZE, nullptr);
-    std::vector<std::vector <std::vector<ull>* > *>
-    lvl1(PAGE_TABLE_LEVEL_1_SIZE,nullptr);
+     * Test of three level paging idea
+      std::vector<ull> lvl3(PAGE_TABLE_LEVEL_3_SIZE,0);
+      std::vector<std::vector<ull>* > lvl2(PAGE_TABLE_LEVEL_2_SIZE, nullptr);
+      std::vector<std::vector <std::vector<ull>* > *>
+      lvl1(PAGE_TABLE_LEVEL_1_SIZE,nullptr);
 
-    lvl2[0] = &lvl3;
-  */
+      lvl2[0] = &lvl3;
+    */
 
   return;
 }
@@ -366,14 +384,13 @@ int main() {
     std::cerr << "Unable to open file." << std::endl;
     return 1; // Return error code
   }
-   // Test string
-    std::string test_string;
-    std::getline(file, test_string);
-  
-  while (!test_string.empty()) {
+  // Test string
+  std::string test_string;
+  // std::getline(file, test_string);
+
+  while (std::getline(file, test_string)) {
     std::regex pattern(R"(T(\d+):0x([0-9A-Fa-f]+):(\d+)(K|M)B)");
 
-   
     boost::trim(test_string);
 
     // Declare a match object to hold the results of the search
@@ -382,7 +399,7 @@ int main() {
     ull task_id;
     ull memory_address;
     ull memory_size;
-    
+
     // Perform the regex search with capturing groups
     if (std::regex_search(test_string, match, pattern)) {
       // match[1] is the first capture group (Task ID)
@@ -393,40 +410,100 @@ int main() {
 
       // match[3] is the third capture group (Memory Size in KB)
       memory_size = std::stoull(match[3].str());
-      std::cout<<"task_id: "<<match[1].str()<<"\tMemory_address " <<match[2].str()<<"\t MemorySize "<<match[3].str()<<std::endl;
-            // printf("task_id: %s\tMemory_address %s\t MemorySize %s\t\n", , match[2].str(), match[3].str());
-      printf("task_id: %llu\tMemory_address %llu\t MemorySize %llu\t\n", task_id, memory_address, memory_size);
-    }
 
-    for (ull i = 0; i < holdsAllTasks.size(); i++) {
-      if (holdsAllTasks[i].task_id == task_id) {
-        holdsAllTasks[i].requestMemory(memory_size, memory_address);
-        break;
+      if (match[4].str()[0] == 'K') {
+        memory_size = memory_size << 10;
+      } else {
+        memory_size = memory_size << 20;
       }
-
-      else {
+      // std::cout<<"task_id: "<<match[1].str()<<"\tMemory_address "
+      // <<match[2].str()<<"\t MemorySize "<<match[3].str()<<std::endl;
+      // printf("task_id: %s\tMemory_address %s\t MemorySize %s\t\n", ,
+      // match[2].str(), match[3].str());
+      // printf("task_id: %llu\tMemory_address %llx\t MemorySize %llu\t\n",
+      // task_id, memory_address, memory_size);
+    }
+    // printf("task_id: %llu\tMemory_address %llx\t MemorySize %llu\t\n",
+    // task_id, memory_address, memory_size);
+    if (holdsAllTasks.empty()) {
+      Task newtask;
+      newtask.task_id = task_id;
+      newtask.requestMemory(memory_size, memory_address);
+      holdsAllTasks.push_back(newtask);
+    } else {
+      bool taskFound = false;
+      for (auto &existingTask : holdsAllTasks) {
+        if (existingTask.task_id == task_id) {
+          existingTask.requestMemory(memory_size, memory_address);
+          taskFound = true;
+          break;
+        }
+      }
+      if (!taskFound) {
         Task newtask;
         newtask.task_id = task_id;
-        holdsAllTasks.push_back(newtask);
         newtask.requestMemory(memory_size, memory_address);
+        holdsAllTasks.push_back(newtask);
       }
     }
-    std::getline(file, test_string);
+
+    //     if ( holdsAllTasks.size() ==0 ){
+    //       Task newtask;
+    //         newtask.task_id = task_id;
+    //         holdsAllTasks.push_back(newtask);
+
+    //         // std::cout<<"New task"<< holdsAllTasks.back().task_id
+    //         <<std::endl; newtask.requestMemory(memory_size, memory_address);
+    //     }
+    // printf("before loop");
+    //     for (ull i = 0; i < holdsAllTasks.size(); i++) {
+    //       printf(" iN loop 1\n");
+    //       std::cout<< holdsAllTasks.size() << std::endl;
+
+    //       if (holdsAllTasks[i].task_id == task_id) {
+
+    //         holdsAllTasks[i].requestMemory(memory_size, memory_address);
+    //         std::cout<<"found existing
+    //         task"<<holdsAllTasks[i].task_id<<std::endl; break;
+
+    //       } else {
+    //         Task newtask;
+    //         newtask.task_id = task_id;
+    //         holdsAllTasks.push_back(newtask);
+
+    //         std::cout<<"New task"<< holdsAllTasks.back().task_id <<std::endl;
+    //         newtask.requestMemory(memory_size, memory_address);
+    //       }
+    //     }
+    // printf("after loop");
   }
+  file.close();
+
   std::cout
-      << "Check the Following Memory Details of Processes and Memory Manager :"
+      << "\n\n\n\nCheck the Following Memory Details of Processes and Memory Manager :"
       << std::endl;
   std::cout << "As per the Assignment we have the following assumptions :"
             << std::endl;
-  std::cout << "Virtual Memory size is  : " << VIRTUAL_MEM_SIZE << " Bytes"<< std::endl;
-  std::cout << "Physical Memory size is : " << PHYSICAL_MEM_SIZE << " Bytes"<< std::endl;
-  std::cout << "Page Size size is       : " << PAGE_SIZE << " Bytes"<< std::endl;
+  std::cout << "Virtual Memory size is  : " << VIRTUAL_MEM_SIZE << " Bytes"
+            << std::endl;
+  std::cout << "Physical Memory size is : " << PHYSICAL_MEM_SIZE << " Bytes"
+            << std::endl;
+  std::cout << "Page Size size is       : " << PAGE_SIZE << " Bytes"
+            << std::endl;
+
+ull totalPageHitsImplementationA=0;
+ull totalPageHitsImplementationB=0;
+ull totalPageFaultsImplementationA=0;
+ull totalPageFaultsImplementationB=0;
 
   for (ull i = 0; i < holdsAllTasks.size(); i++) {
     std::cout << "The Task ID - T" << holdsAllTasks[i].task_id
               << " has the following details : " << std::endl;
     std::cout << "Page Table Size is : " << holdsAllTasks[i].pageTableSize
               << std::endl;
+    std::cout << "hash map Size is : "
+              << holdsAllTasks[i].PageTableImplementationA.size() << std::endl;
+
     std::cout << "Number of Page hits in Implementation A (hash_map) are  = :"
               << holdsAllTasks[i].pageHitImplementationA << std::endl;
     std::cout << "Number of Page hits in Implementation B (Single Level Page "
@@ -448,17 +525,34 @@ int main() {
                      holdsAllTasks[i].pageFaultImplementationClvl2 +
                      holdsAllTasks[i].pageFaultImplementationClvl3
               << std::endl;
+totalPageHitsImplementationA  =totalPageHitsImplementationA + holdsAllTasks[i].pageHitImplementationA;
+totalPageHitsImplementationB  =totalPageHitsImplementationB + holdsAllTasks[i].pageHitImplementationB;
+totalPageFaultsImplementationA=totalPageFaultsImplementationA + holdsAllTasks[i].pageFaultImplementationA;
+totalPageFaultsImplementationB=totalPageFaultsImplementationB + holdsAllTasks[i].pageFaultImplementationB;
+
   }
 
   std::cout << std::endl;
-  std::cout << "Memory Details for Implementation as Map and Single Level Page Table" <<std::endl;
+  std::cout
+      << "Memory Details for Implementation as Map and Single Level Page Table"
+      << std::endl;
   std::cout << " Free Memory : " << mmInstance.freeMemory << " Bytes\n";
   std::cout << " Memory Used : " << (PHYSICAL_MEM_SIZE - mmInstance.freeMemory)
             << "  Bytes\n";
+  // printf("Total No of Page Hits Implementation A: %llu \n",totalPageHitsImplementationA);
+  // printf("Total No of Page Hits Implementation B: %llu \n",totalPageHitsImplementationB);
+  std::cout<< "Total No of Page Hits Implementation A:  " << totalPageHitsImplementationA<< std::endl;
+  std::cout<< "Total No of Page Hits Implementation B:  " << totalPageHitsImplementationB<< std::endl;
 
-        std::cout << std::endl;
-  std::cout << "Memory Details for Three Level Page Table Implementation " <<std::endl;
-  std::cout << " Free Memory : " << mmInstance.freeMemoryMultiLevel << " Bytes\n";
-  std::cout << " Memory Used : " << (PHYSICAL_MEM_SIZE - mmInstance.freeMemoryMultiLevel)
+  std::cout<< "Total No of Page Miss Implementation A: " << totalPageFaultsImplementationA<< std::endl;
+  std::cout<< "Total No of Page Miss Implementation B: " << totalPageFaultsImplementationB<< std::endl;
+
+  std::cout << std::endl;
+  std::cout << "Memory Details for Three Level Page Table Implementation "
+            << std::endl;
+  std::cout << " Free Memory : " << mmInstance.freeMemoryMultiLevel
+            << " Bytes\n";
+  std::cout << " Memory Used : "
+            << (PHYSICAL_MEM_SIZE - mmInstance.freeMemoryMultiLevel)
             << "  Bytes\n";
 }
