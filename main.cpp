@@ -11,6 +11,16 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <iomanip>
+//
+
+unsigned long long stringToAddress(const std::string& hexString) {
+    std::stringstream ss(hexString);
+    unsigned long long address;
+    ss >> std::hex >> address;
+    return address;
+}
 
 // USING ull for all numbers
 #define ull unsigned long long
@@ -379,7 +389,7 @@ int main() {
       task_id = std::stoull(match[1].str());
 
       // match[2] is the second capture group (Memory Address in Hex)
-      memory_address = std::stoull(match[2].str());
+      memory_address = stringToAddress(match[2].str());
 
       // match[3] is the third capture group (Memory Size in KB)
       memory_size = std::stoull(match[3].str());
