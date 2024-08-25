@@ -349,20 +349,21 @@ void Task::requestMemory(ull size, ull virtual_address) {
 int main() {
   std::vector<Task> holdsAllTasks;
   std::string inputFilename;
-  std::cout << "Enter the file name with the extension .text :" << std::endl;
+  std::cout << "Enter the file name with the extension .txt :" << std::endl;
   std::cin >> inputFilename;
-  std::ifstream file("inputFilename");
+  std::ifstream file(inputFilename);
   if (!file) {
     std::cerr << "Unable to open file." << std::endl;
     return 1; // Return error code
   }
-  std::string line;
-  while (std::getline(file, line)) {
-    std::regex pattern(R"(T(\d+):0x([0-9A-Fa-f]+):(\d+)KB)");
-
-    // Test string
+   // Test string
     std::string test_string;
     std::getline(file, test_string);
+  
+  while (!test_string.empty()) {
+    std::regex pattern(R"(T(\d+):0x([0-9A-Fa-f]+):(\d+)(K|M)B)");
+
+   
     boost::trim(test_string);
 
     // Declare a match object to hold the results of the search
@@ -371,6 +372,7 @@ int main() {
     ull task_id;
     ull memory_address;
     ull memory_size;
+    
     // Perform the regex search with capturing groups
     if (std::regex_search(test_string, match, pattern)) {
       // match[1] is the first capture group (Task ID)
@@ -381,6 +383,9 @@ int main() {
 
       // match[3] is the third capture group (Memory Size in KB)
       memory_size = std::stoull(match[3].str());
+      std::cout<<"task_id: "<<match[1].str()<<"\tMemory_address " <<match[2].str()<<"\t MemorySize "<<match[3].str()<<std::endl;
+            // printf("task_id: %s\tMemory_address %s\t MemorySize %s\t\n", , match[2].str(), match[3].str());
+      printf("task_id: %llu\tMemory_address %llu\t MemorySize %llu\t\n", task_id, memory_address, memory_size);
     }
 
     for (ull i = 0; i < holdsAllTasks.size(); i++) {
@@ -396,15 +401,16 @@ int main() {
         newtask.requestMemory(memory_size, memory_address);
       }
     }
+    std::getline(file, test_string);
   }
   std::cout
       << "Check the Following Memory Details of Processes and Memory Manager :"
       << std::endl;
   std::cout << "As per the Assignment we have the following assumptions :"
             << std::endl;
-  std::cout << "Virtual Memory size is  : " << VIRTUAL_MEM_SIZE << std::endl;
-  std::cout << "Physical Memory size is : " << PHYSICAL_MEM_SIZE << std::endl;
-  std::cout << "Page Size size is       : " << PAGE_SIZE << std::endl;
+  std::cout << "Virtual Memory size is  : " << VIRTUAL_MEM_SIZE << " Bytes"<< std::endl;
+  std::cout << "Physical Memory size is : " << PHYSICAL_MEM_SIZE << " Bytes"<< std::endl;
+  std::cout << "Page Size size is       : " << PAGE_SIZE << " Bytes"<< std::endl;
 
   for (ull i = 0; i < holdsAllTasks.size(); i++) {
     std::cout << "The Task ID - T" << holdsAllTasks[i].task_id
