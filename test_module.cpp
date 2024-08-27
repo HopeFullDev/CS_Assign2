@@ -1,6 +1,7 @@
 #include "config.h"
 #include <iostream>
 #include <random>
+#include <pthread.h>
 // USING ull for all numbers
 #define ull unsigned long long
 
@@ -37,6 +38,7 @@ int main(int argc, char *argv[]) {
   Test_Module trace;
   int noOfTrace = 10;
   for (int i = 0; i < noOfTrace; i++) {
+    pthread_create( ,&trace.Genetrate_Traces ,  );
     trace.Genetrate_Traces((ull)i, (ull)3, (ull)33);
   }
 
