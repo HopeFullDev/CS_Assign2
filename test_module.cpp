@@ -10,8 +10,9 @@ public:
   void Genetrate_Traces(ull task_id);
 };
 void Test_Module ::Genetrate_Traces(ull task_id) {
-  ull min = firstAllotedFrameNo;
-  ull max = min + noOfFramesAlloted - 1;
+  ull min = 0x10000000;
+  ull max = 0x5FFFFFFF;
+  cout<<min <<" "<<max;
 
   // Create a random number generator
   std::random_device rd;  // Obtain a random seed from the hardware
