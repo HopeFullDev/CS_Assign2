@@ -7,11 +7,9 @@
 
 class Test_Module {
 public:
-  void Genetrate_Traces(ull task_id, ull noOfFramesAlloted,
-                        ull firstAllotedFrameNo);
+  void Genetrate_Traces(ull task_id);
 };
-void Test_Module ::Genetrate_Traces(ull task_id, ull noOfFramesAlloted,
-                                    ull firstAllotedFrameNo) {
+void Test_Module ::Genetrate_Traces(ull task_id) {
   ull min = firstAllotedFrameNo;
   ull max = min + noOfFramesAlloted - 1;
 
