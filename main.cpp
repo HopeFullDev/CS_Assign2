@@ -307,17 +307,17 @@ void Task::requestMemory(ull size, ull virtual_address) {
         (copy_of_virtual_addr >>
          (PAGE_TABLE_OFFSET_BITS + ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE) +
                                     (ull)log2(PAGE_TABLE_LEVEL_2_SIZE)))) &
-        ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1);
+        (PAGE_TABLE_LEVEL_1_SIZE - 1);
     //  this index will store point to a level 2 page here each entry denotes
     //  4KB physical space
     ull level2_index =
         (copy_of_virtual_addr >>
          (PAGE_TABLE_OFFSET_BITS + ((ull)log2(PAGE_TABLE_LEVEL_3_SIZE)))) &
-        ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1);
+        (PAGE_TABLE_LEVEL_2_SIZE - 1);
     // this index point to value in level1_index here each entry denotes 4MB
     // physical space
     ull level3_index = ((copy_of_virtual_addr >> PAGE_TABLE_OFFSET_BITS) &
-                        ((1ULL << PAGE_TABLE_OFFSET_BITS) - 1));
+                        (PAGE_TABLE_LEVEL_3_SIZE - 1));
 
     // printf("\nVirtual Address %llx\t, Lvl1 index %llu\t Lvl2 index %llu\t
     // Lvl3 "
